@@ -44,6 +44,8 @@ The real Issie types have been simplified here.
         Data : Map<int64,int64>
     }
 
+
+
     // Types of specific components
     type ComponentType =
         | Input of BusWidth: int | Output of BusWidth: int | IOLabel 
@@ -56,8 +58,10 @@ The real Issie types have been simplified here.
         | MergeWires | SplitWire of BusWidth: int // int is bus width
         // DFFE is a DFF with an enable signal.
         // No initial state for DFF or Register? Default 0.
-        | DFF | DFFE | Register of BusWidth: int | RegisterE of BusWidth: int 
+        | DFF | DFFE 
+        | Register of BusWidth: int | RegisterE of BusWidth: int 
         | AsyncROM of Memory | ROM of Memory | RAM of Memory // memory is contents
+        | BusDecoder of InitialNumber:int* BusWidth: int* NumberOfOutputs: int  
 
     /// Component type (cut-down for Tick3)
     /// Id uniquely identifies the component within a sheet and is used by draw2d library.
