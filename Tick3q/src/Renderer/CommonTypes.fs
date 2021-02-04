@@ -61,7 +61,7 @@ The real Issie types have been simplified here.
         | DFF | DFFE 
         | Register of BusWidth: int | RegisterE of BusWidth: int 
         | AsyncROM of Memory | ROM of Memory | RAM of Memory // memory is contents
-        | BusDecoder of InitialNumber:int* BusWidth: int* NumberOfOutputs: int  
+        | BusDecoder of BusWidth: int * InitialNumber:int * NumberOfOutputs: int  
 
     /// Component type (cut-down for Tick3)
     /// Id uniquely identifies the component within a sheet and is used by draw2d library.

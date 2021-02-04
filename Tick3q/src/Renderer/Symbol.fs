@@ -23,32 +23,17 @@ let posOf x y = {X=x;Y=y} // helper
 // add your own functions as needed
 
 
+
 //-----------------------------------------------------------------------------------------//
-
-
-/// write this for Tick3 using your modified ComponentType
-/// you may add to type definition in CommonTypes
 let makeBusDecoderComponent (pos:XYPos) (w: int) (a: int) (n: int): Component = 
    {    
         X = int pos.X
         Y = int pos.Y
         W = 0
         H = 0
-        Type = BusDecoder (BusWidth = w, InitialNumber = a,NumberOfOutputs = n)
+        Type = BusDecoder (BusWidth = w, InitialNumber = a, NumberOfOutputs = n)
     }
-    
-
-/// demo function - not needed for Tick3 answer
-//let makeDummyComponent (pos: XYPos): Component =
-//    { 
-//        X = int pos.X
-//        Y = int pos.Y
-//        W = 100 // dummy
-//        H = 100 // dummy
-//        Type = Not // dummy
-//    }
-
-//-----------------------Elmish functions with no content in Tick3----------------------//
+    //-----------------------Elmish functions with no content in Tick3----------------------//
 
 /// For this program init() generates the required result
 let init () =
@@ -60,126 +45,113 @@ let update (msg : Msg) (model : Model): Model*Cmd<'a>  =
     | () -> model, Cmd.none // do nothing if we receive the (only) message
 
 //----------------------------View Function for Symbol----------------------------//
-
 /// Tick3 answer
 let busDecoderView (comp: Component) = 
-    let fX = float comp.X
-    let fY = float comp.Y
-    
-    let matchAWN =
-        match comp.Type with
-        |BusDecoder (a,w,n)-> (a,w,n)
-        | _ -> failwithf "Shouldn't happen"
-    
-    let (a,w,n) = matchAWN
-    
-    let goldenRatio = 1.62   //goldenRatio of a rectangle
-    let rectWidth = 125.0
-    let rectHeight= goldenRatio * rectWidth
 
-    
-
-    let scaleFactor=1.0 // to demonstrate svg scaling
-    let rotation=0 // to demonstrate svg rotation (in degrees)
-    g   [ Style [ 
-            // the transform here does rotation, scaling, and translation
-            // the rotation and scaling happens with TransformOrigin as fixed point first
-            TransformOrigin "0px 50px" // so that rotation is around centre of line
-            Transform (sprintf "translate(%fpx,%fpx) rotate(%ddeg) scale(%f) " fX fY rotation scaleFactor )
-            ]
-
-        ]  // g optional attributes in first list
-        // use g svg element (SVG equivalent of div) to group any number of ReactElements into one.
-        // use transform with scale and/or translate and/or rotate to transform group
-        [
-            polygon [ // a demo svg polygon triangle
-                SVGAttr.Points (sprintf $"{fX},{fY} {rectWidth+fX},{fY} {rectWidth+fX},{rectHeight+fY} {fX}, {rectHeight+fY} ") 
-                SVGAttr.StrokeWidth "5px"
-                SVGAttr.Stroke "Black"
-                SVGAttr.FillOpacity 0.1
-                SVGAttr.Fill "Blue"] []
-
-            line [X1 0.; Y1 0.; X2 0.; Y2 (100.) ; Style [Stroke "Black"]] [
-             // child elements of line do not display since children of svg are dom elements
-             // and svg will only display on svg canvas, not in dom.
-             // hence this is not used
-            ]
-            text [ // a demo text svg element
-                X 0.; 
-                Y 100.; 
-                Style [
-                    TextAnchor "" // left/right/middle: horizontal algnment vs (X,Y)
-                    DominantBaseline "auto" // auto/middle/hanging: vertical alignment vs (X,Y)
-                    FontSize "15px"
-                    FontWeight "Bold"
-                    Fill "Blue" // demo font color
-                ]
-            ] [str <| sprintf "X=%.0f Y=%.0f" fX fY]   
-            
-            //(*[str <| sprintf "X=%.0f Y=%.0f" fX fY] // child of text element is text to display*)
-    ]
-
-/// demo function can be deleted
-let busDecoderViewDummy (comp: Component) = 
-    let fX = float comp.X
-    let fY = float comp.Y 
-    // in real code w,a,n would come from the component, but as the busDecoder case is not yet written this
-    // is a workaround compatible with the dummy components
-    let w,a,n = if fX < 100. then (3,0,8) else (4,3,5) // workaround
-    //
-    // This code demonstrates svg transformations, not needed for Tick3 but useful.
-    // The elmish react syntax here uses CSS style transforms, not SVG attribute transforms. They are different.
-    // In addition, svg elements transform under css differently from html.
-    // See https://css-tricks.com/transforms-on-svg-elements/ for details if needed.
-    //
-    let scaleFactor=1.0 // to demonstrate svg scaling
-    let rotation=0 // to demonstrate svg rotation (in degrees)
-    g   [ Style [ 
-            // the transform here does rotation, scaling, and translation
-            // the rotation and scaling happens with TransformOrigin as fixed point first
-            TransformOrigin "0px 50px" // so that rotation is around centre of line
-            Transform (sprintf "translate(%fpx,%fpx) rotate(%ddeg) scale(%f) " fX fY rotation scaleFactor )
-            ]
+    match comp.Type with 
+    |BusDecoder (w,a,n) ->
         
-        ]  // g optional attributes in first list
-        // use g svg element (SVG equivalent of div) to group any number of ReactElements into one.
-        // use transform with scale and/or translate and/or rotate to transform group
-        [
-            polygon [ // a demo svg polygon triangle
-                SVGAttr.Points "10,10 900,900 10,900"
-                SVGAttr.StrokeWidth "5px"
-                SVGAttr.Stroke "Black"
-                SVGAttr.FillOpacity 0.1
-                SVGAttr.Fill "Blue"] []
+        let fX = float comp.X
+        let fY = float comp.Y
+        let goldenRatio = 1.62   //goldenRatio of a rectangle
+        let rectWidth = 80.0
+        let rectHeight =
+            if n <= 5 then goldenRatio * rectWidth
+                else goldenRatio * rectWidth + 21.0*(float n-5.0)
 
-            line [X1 0.; Y1 0.; X2 0.; Y2 (100.) ; Style [Stroke "Black"]] [
-             // child elements of line do not display since children of svg are dom elements
-             // and svg will only display on svg canvas, not in dom.
-             // hence this is not used
-            ]
-            text [ // a demo text svg element
-                X 0.; 
-                Y 100.; 
+        let fXEnd = fX + rectWidth
+        let centreX = (fX + rectWidth+ fX)/2.0
+        let centreY = (fY + rectHeight+ fY)/2.0
+        let titleY = (fY + 12.5)
+
+        let scaleFactor=1.5 // to demonstrate svg scaling
+        let rotation=0 // to demonstrate svg rotation (in degrees)
+  
+        let generateInputText = 
+           text [
+                X (fX+3.5)
+                Y (centreY) 
+                Style [
+                    TextAnchor "left" // left/right/middle: horizontal algnment vs (X,Y)
+                    DominantBaseline "auto" // auto/middle/hanging: vertical alignment vs (X,Y)
+                    FontSize "12px"
+                    FontWeight "Bold "
+                    Fill "Black" // demo font color
+                ]
+                ] [str <|sprintf $"In"]
+    
+        let generateTitle =
+           text [ // a demo text svg element
+                X centreX; 
+                Y titleY; 
                 Style [
                     TextAnchor "middle" // left/right/middle: horizontal algnment vs (X,Y)
-                    DominantBaseline "hanging" // auto/middle/hanging: vertical alignment vs (X,Y)
-                    FontSize "10px"
+                    DominantBaseline "auto" // auto/middle/hanging: vertical alignment vs (X,Y)
+                    FontSize "9px"
                     FontWeight "Bold"
-                    Fill "Blue" // demo font color
+                    Fill "Black" // demo font color
                 ]
-            ] [str <| sprintf "X=%.0f Y=%.0f" fX fY] // child of text element is text to display
-    ]
+           ] [str <| sprintf "Bus Decode"]
+   
+        let numbers = [a..a+n-1]   
+    
+  
+        let helperOutputText (i: int) (a: int) = 
+            text [
+                X (fXEnd-13.0)
+                Y (titleY+21.0*(float i+1.0)) 
+                Style [
+                    TextAnchor "middle" // left/right/middle: horizontal algnment vs (X,Y)
+                    DominantBaseline "auto" // auto/middle/hanging: vertical alignment vs (X,Y)
+                    FontSize "12px"
+                    FontWeight "Bold "
+                    Fill "Black" // demo font color
+                ]
+                ] [
+                    str <|sprintf $"{a}"
+                    ]
+
+        let generateOutputText = List.mapi helperOutputText numbers
+
+        let BusDecoderText =[generateTitle; generateInputText] @ generateOutputText
+
+        let BusDecoderOutline = [
+                polygon [ // a demo svg polygon triangle
+                    SVGAttr.Points (sprintf $"{fX},{fY} {rectWidth+fX},{fY} {rectWidth+fX},{rectHeight+fY} {fX}, {rectHeight+fY} ") 
+                    SVGAttr.StrokeWidth "1px"
+                    SVGAttr.Stroke "Black"
+                    SVGAttr.FillOpacity 0.1
+                    SVGAttr.Fill "Blue"] []
+               ]
+           
+        let BusDecoderDrawing = BusDecoderOutline @ BusDecoderText
+
+        ///grouped react element
+        g   [   Style [    
+                // the transform here does rotation, scaling, and translation
+                // the rotation and scaling happens with TransformOrigin as fixed point first
+                    TransformOrigin "0px 50px" // so that rotation is around centre of line
+                    Transform (sprintf "translate(%fpx,%fpx) rotate(%ddeg) scale(%f) " fX fY rotation scaleFactor )
+                ]
+        
+            ]
+            BusDecoderDrawing
+    
+    |_ -> failwithf " Bro "
+
+
+    //---------------------------- (Ends) View Function for Symbol ----------------------------//
        
 
 
 /// View function - in this case view is independent of model
 let view (model : Model) (dispatch : Msg -> unit) =    
     [   // change for Tick3 answer
-        makeBusDecoderComponent { X=200.; Y=20.} 5 5 5 ;// for Tick 3 two components
-
-        //makeBusDecoderComponent {X=100.; Y=20.} 
+        makeBusDecoderComponent {X=100.; Y=20.} 3 0 8 ;// for Tick 3 two component
+        makeBusDecoderComponent {X=200.; Y=20.} 4 3 5 ;
     ] 
-    |> List.map busDecoderView // change for Tick3 answer
+    |> List.map busDecoderView 
+    
     |> (fun svgEls -> 
         svg [
             Style [
@@ -195,9 +167,19 @@ type ValidateError =
    | AIsInvalid // for given w, ignoring n
    | NIsInvalid // for given a,w
 
-/// Tick3 answer
 let busDecoderValidate (comp:Component) : Result<Component, ValidateError*string> =
-    failwithf "Not implemented"
+
+    match comp.Type with
+    |BusDecoder (w,a,n) ->
+        let maxBusValue = int (2.0 ** float w)
+        match (w,a,n) with
+        |(w,_,_) when w <= 0 ->Error <| (WIsInvalid,"busWidth w has to be a positive interger")
+        |(w,a,_) when w > 0 && a < 0 || a >= (maxBusValue)  ->Error <| (AIsInvalid,"a has to be between 0 to (2^w-1)")
+        |(w,a,n) when n <= 0 ->Error <| (NIsInvalid,"outputNumber n has to be a positive integer")
+        |(w,a,n) when w > 0 && a >= 0 && a < maxBusValue && (n <= 0 || a+n > maxBusValue) ->  Error <| (NIsInvalid, "a+n has to be less than or equal to (2^w+1) where w is the busWidth")
+        | _ -> Ok <| comp
+
+    |_ -> failwithf "not busDecoder"
     
 
 
