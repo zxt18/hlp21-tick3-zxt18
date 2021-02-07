@@ -56,40 +56,40 @@ let busDecoderView (comp: Component) =
         let goldenRatio = 1.62   //goldenRatio of a rectangle
         let rectWidth = 80.0
         let rectHeight =
-            if n <= 5 then goldenRatio * rectWidth
-                else goldenRatio * rectWidth + 21.0*(float n-5.0)
+            if n <= 5 then goldenRatio * rectWidth //default height is capable of containing 5 outputs
+                else goldenRatio * rectWidth + 21.0*(float n-5.0) // > 5 outputs so increase height
 
         let fXEnd = fX + rectWidth
-        let centreX = (fX + rectWidth+ fX)/2.0
+        let centreX = (fX + rectWidth+ fX)/2.0 
         let centreY = (fY + rectHeight+ fY)/2.0
-        let titleY = (fY + 12.5)
+        let titleY = (fY + 12.5) 
 
         let scaleFactor=1.5 // to demonstrate svg scaling
         let rotation=0 // to demonstrate svg rotation (in degrees)
   
-        let generateInputText = 
+        let generateInputText =  //input side
            text [
                 X (fX+3.5)
                 Y (centreY) 
                 Style [
-                    TextAnchor "left" // left/right/middle: horizontal algnment vs (X,Y)
-                    DominantBaseline "auto" // auto/middle/hanging: vertical alignment vs (X,Y)
-                    FontSize "12px"
+                    TextAnchor "left" 
+                    DominantBaseline "auto" 
+                    FontSize "11px"
                     FontWeight "Bold "
-                    Fill "Black" // demo font color
+                    Fill "Black" 
                 ]
                 ] [str <|sprintf $"In"]
     
-        let generateTitle =
-           text [ // a demo text svg element
+        let generateTitle = 
+           text [ 
                 X centreX; 
                 Y titleY; 
                 Style [
-                    TextAnchor "middle" // left/right/middle: horizontal algnment vs (X,Y)
-                    DominantBaseline "auto" // auto/middle/hanging: vertical alignment vs (X,Y)
+                    TextAnchor "middle"
+                    DominantBaseline "auto" 
                     FontSize "9px"
                     FontWeight "Bold"
-                    Fill "Black" // demo font color
+                    Fill "Black" 
                 ]
            ] [str <| sprintf "Bus Decode"]
    
@@ -101,19 +101,22 @@ let busDecoderView (comp: Component) =
                 X (fXEnd-13.0)
                 Y (titleY+21.0*(float i+1.0)) 
                 Style [
-                    TextAnchor "middle" // left/right/middle: horizontal algnment vs (X,Y)
-                    DominantBaseline "auto" // auto/middle/hanging: vertical alignment vs (X,Y)
-                    FontSize "12px"
+                    TextAnchor "middle" 
+                    DominantBaseline "auto" 
+                    FontSize "11px"
                     FontWeight "Bold "
-                    Fill "Black" // demo font color
+                    Fill "Black" 
                 ]
                 ] [
                     str <|sprintf $"{a}"
                     ]
-
+        
+        
         let generateOutputText = List.mapi helperOutputText numbers
 
-        let BusDecoderText =[generateTitle; generateInputText] @ generateOutputText
+        let BusDecoderText =[generateTitle; generateInputText] @ generateOutputText //All the text consolidated in BusDecoderText
+
+
 
         let BusDecoderOutline = [
                 polygon [ // a demo svg polygon triangle
@@ -128,9 +131,7 @@ let busDecoderView (comp: Component) =
 
         ///grouped react element
         g   [   Style [    
-                // the transform here does rotation, scaling, and translation
-                // the rotation and scaling happens with TransformOrigin as fixed point first
-                    TransformOrigin "0px 50px" // so that rotation is around centre of line
+                    TransformOrigin "0px 0px"
                     Transform (sprintf "translate(%fpx,%fpx) rotate(%ddeg) scale(%f) " fX fY rotation scaleFactor )
                 ]
         
@@ -176,7 +177,7 @@ let busDecoderValidate (comp:Component) : Result<Component, ValidateError*string
         |(w,_,_) when w <= 0 ->Error <| (WIsInvalid,"busWidth w has to be a positive interger")
         |(w,a,_) when w > 0 && a < 0 || a >= (maxBusValue)  ->Error <| (AIsInvalid,"a has to be between 0 to (2^w-1)")
         |(w,a,n) when n <= 0 ->Error <| (NIsInvalid,"outputNumber n has to be a positive integer")
-        |(w,a,n) when w > 0 && a >= 0 && a < maxBusValue && (n <= 0 || a+n > maxBusValue) ->  Error <| (NIsInvalid, "a+n has to be less than or equal to (2^w+1) where w is the busWidth")
+        |(w,a,n) when w > 0 && a >= 0 && a < maxBusValue && (n <= 0 || a+n > maxBusValue) ->  Error <| (NIsInvalid, "a+n has to be less than or equal to (2^w+1) where w is the busWidth. Please reduce n ")
         | _ -> Ok <| comp
 
     |_ -> failwithf "not busDecoder"
